@@ -1,6 +1,18 @@
 A simple example of matrix use in OpenGL
 ========================================
 
+Changes made
+------------
+Put the vertex shader and fragment shader in separate files.
+
+Added a shader loader function that gets the shaders from the files.
+
+Made the cube rotate with the glm function rotate().
+
+Problems
+--------
+Had problems uploading files to github.
+
 Building This Example
 ---------------------
 
