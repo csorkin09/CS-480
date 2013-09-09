@@ -244,8 +244,8 @@ bool initialize()
     // Put these into files and write a loader in the future
     // Note the added uniform!
 
-    std::string vs_string = shaderLoader("../src/vs.txt");
-    std::string fs_string = shaderLoader("../src/fs.txt");
+    std::string vs_string = shaderLoader("../bin/vs.txt");
+    std::string fs_string = shaderLoader("../bin/fs.txt");
 
     const char* vs = vs_string.c_str();
     const char* fs = fs_string.c_str();
