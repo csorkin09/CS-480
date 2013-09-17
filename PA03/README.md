@@ -1,15 +1,20 @@
 Changes made
 ------------
 Made left and right arrow keys change rotation of planet
+
 Made 'A' and 'a' change orbit counter-clockwise
+
 Made 'D' and 'd' change orbit clockwise
+
 Added moon, moon orbits around planet
  
 
 Problems
 --------
 Problems with changing orbit direction
+
 Problems with having the moon orbit the planet
+
 Problems with scaling the moon
 
 
