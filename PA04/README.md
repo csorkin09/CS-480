@@ -14,6 +14,10 @@ Took out rotation and orbit
 Added Model Loader to load .obj file
 
 Added command line arguments(only takes the executable and file name)
+
+Added all .obj conditions/cases
+
+**DID NOT DO QUADS 
  
 
 Problems
@@ -23,6 +27,10 @@ Had problems reading the object file
 Had problems setting the vertices to the faces
 
 Had problems with reading the file from the command prompt
+
+Had problems getting the size of the different cases
+
+Had problems writing the other cases
 
 
 Building This Example

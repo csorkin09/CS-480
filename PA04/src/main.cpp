@@ -64,6 +64,7 @@ int stop;
 int reverse;
 int flip;
 char* file;
+int vertexSize;
 
 
 //--Main
@@ -167,7 +168,7 @@ void render()
                            sizeof(Vertex),
                            (void*)offsetof(Vertex,color));
 
-    glDrawArrays(GL_TRIANGLES, 0, 36);//mode, starting index, count
+    glDrawArrays(GL_TRIANGLES, 0, vertexSize);//mode, starting index, count
 
 
     //clean up
@@ -341,7 +342,7 @@ bool initialize()
     // Create a Vertex Buffer object to store this vertex info on the GPU
     glGenBuffers(1, &vbo_geometry);
     glBindBuffer(GL_ARRAY_BUFFER, vbo_geometry);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(geometry), geometry, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertexSize*sizeof(Vertex), geometry, GL_STATIC_DRAW);
 
     //--Geometry done
 
@@ -478,6 +479,7 @@ bool loadObj(char *fileName, Vertex geometry[])
     std::vector<glm::vec2> temp_uvs;
     std::vector<glm::vec3> temp_normals;
     glm::vec3 tempVec3;
+    int flag1, flag2, flag3 = 0;
 
     
 
@@ -509,6 +511,7 @@ bool loadObj(char *fileName, Vertex geometry[])
             glm::vec3 vertex;
             fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
             temp_vertices.push_back(vertex);
+            flag1 = 1;
 	}
         //parse all the "vt"
 	else if(strcmp(lineHeader, "vt") == 0 )
@@ -516,6 +519,7 @@ bool loadObj(char *fileName, Vertex geometry[])
             glm::vec2 uv;
             fscanf(file, "%f %f\n", &uv.x, &uv.y);
             temp_uvs.push_back(uv);
+            flag2 = 1;
 	}
         //parse all the "vn"
 	else if(strcmp(lineHeader, "vn" ) == 0)
@@ -523,25 +527,63 @@ bool loadObj(char *fileName, Vertex geometry[])
             glm::vec3 normal;
     	    fscanf(file, "%f %f %f\n", &normal.x, &normal.y, &normal.z);
     	    temp_normals.push_back(normal);
+            flag3 = 1; 
 	}
         //parse all the "f"
 	else if(strcmp(lineHeader, "f") == 0)
 	{
     	    std::string vertex1, vertex2, vertex3;
-    	    unsigned int vertexIndex[3], normalIndex[3];
-    	    int matches = fscanf(file, "%d//%d %d//%d %d//%d\n", &vertexIndex[0], &normalIndex[0], &vertexIndex[1], &normalIndex[1], &vertexIndex[2], &normalIndex[2]);
+    	    unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
 
-    	    if(matches != 6)
-	    {
-                std::cout<<"File can't be read by our simple parser"<<std::endl;
-                return false;
-    	    }
+
+            if(flag1 == 1 && flag3 == 1)
+            {
+              fscanf(file, "%d//%d %d//%d %d//%d\n", &vertexIndex[0], &normalIndex[0], &vertexIndex[1], &normalIndex[1], &vertexIndex[2], &normalIndex[2]);
+    	      
     	        vertexIndices.push_back(vertexIndex[0]);
     	  	vertexIndices.push_back(vertexIndex[1]);
     		vertexIndices.push_back(vertexIndex[2]);
     		normalIndices.push_back(normalIndex[0]);
     		normalIndices.push_back(normalIndex[1]);
     		normalIndices.push_back(normalIndex[2]);
+            }
+
+           else if(flag1 == 1 && flag2 == 1 && flag3 == 1)
+            {
+              fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
+    	      
+    	        vertexIndices.push_back(vertexIndex[0]);
+    	  	vertexIndices.push_back(vertexIndex[1]);
+    		vertexIndices.push_back(vertexIndex[2]);
+                uvIndices.push_back(uvIndex[0]);
+    	  	uvIndices.push_back(uvIndex[1]);
+    		uvIndices.push_back(uvIndex[2]);
+    		normalIndices.push_back(normalIndex[0]);
+    		normalIndices.push_back(normalIndex[1]);
+    		normalIndices.push_back(normalIndex[2]);
+            }
+
+            else if(flag1 == 1 && flag2 == 1)
+            {
+              fscanf(file, "%d/%d %d/%d %d/%d\n", &vertexIndex[0], &uvIndex[0], &vertexIndex[1], &uvIndex[1], &vertexIndex[2], &uvIndex[2]);
+    	      
+    	        vertexIndices.push_back(vertexIndex[0]);
+    	  	vertexIndices.push_back(vertexIndex[1]);
+    		vertexIndices.push_back(vertexIndex[2]);
+                uvIndices.push_back(uvIndex[0]);
+    	  	uvIndices.push_back(uvIndex[1]);
+    		uvIndices.push_back(uvIndex[2]);
+            }
+
+            else if(flag1 == 1)
+            {
+              fscanf(file, "%d %d %d\n", &vertexIndex[0], &vertexIndex[1], &vertexIndex[2]);
+    	      
+    	        vertexIndices.push_back(vertexIndex[0]);
+    	  	vertexIndices.push_back(vertexIndex[1]);
+    		vertexIndices.push_back(vertexIndex[2]);
+            }
+
 	}
     }
     
@@ -631,6 +673,7 @@ int getFileSize(char* fileName)
    std::vector<glm::vec3> temp_vertices;
    std::vector<glm::vec2> temp_uvs;
    std::vector<glm::vec3> temp_normals;
+   int flag1, flag2, flag3 = 0;
    
 
    FILE* file = fopen(fileName, "r");
@@ -651,29 +694,91 @@ int getFileSize(char* fileName)
        break;
      }
 
+        if(strcmp(lineHeader, "v") == 0)
+        {
+            glm::vec3 vertex;
+            fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
+            temp_vertices.push_back(vertex);
+            flag1 = 1;
+	}
+        //parse all the "vt"
+	else if(strcmp(lineHeader, "vt") == 0 )
+	{
+            glm::vec2 uv;
+            fscanf(file, "%f %f\n", &uv.x, &uv.y);
+            temp_uvs.push_back(uv);
+            flag2 = 1;
+	}
+        //parse all the "vn"
+	else if(strcmp(lineHeader, "vn" ) == 0)
+	{
+            glm::vec3 normal;
+    	    fscanf(file, "%f %f %f\n", &normal.x, &normal.y, &normal.z);
+    	    temp_normals.push_back(normal);
+            flag3 = 1; 
+	}
+
      //line parsing
      if(strcmp(lineHeader, "f") == 0)
 	{
     	    std::string vertex1, vertex2, vertex3;
-    	    unsigned int vertexIndex[3], normalIndex[3];
-    	    int matches = fscanf(file, "%d//%d %d//%d %d//%d\n", &vertexIndex[0], &normalIndex[0], &vertexIndex[1], &normalIndex[1], &vertexIndex[2], &normalIndex[2]);
+    	    unsigned int vertexIndex[3], uvIndex[3], normalIndex[3]; 
 
-    	    if(matches != 6)
-	    {
-                std::cout<<"File can't be read by our simple parser"<<std::endl;
-                return false;
-    	    }
-                // reads through the frames and gets how many vertices you need
+    	    if(flag1 == 1 && flag3 == 1)
+            {
+              fscanf(file, "%d//%d %d//%d %d//%d\n", &vertexIndex[0], &normalIndex[0], &vertexIndex[1], &normalIndex[1], &vertexIndex[2], &normalIndex[2]);
+    	      
     	        vertexIndices.push_back(vertexIndex[0]);
     	  	vertexIndices.push_back(vertexIndex[1]);
     		vertexIndices.push_back(vertexIndex[2]);
     		normalIndices.push_back(normalIndex[0]);
     		normalIndices.push_back(normalIndex[1]);
     		normalIndices.push_back(normalIndex[2]);
+            }
+
+           else if(flag1 == 1 && flag2 == 1 && flag3 == 1)
+            {
+              fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
+    	      
+    	        vertexIndices.push_back(vertexIndex[0]);
+    	  	vertexIndices.push_back(vertexIndex[1]);
+    		vertexIndices.push_back(vertexIndex[2]);
+                uvIndices.push_back(uvIndex[0]);
+    	  	uvIndices.push_back(uvIndex[1]);
+    		uvIndices.push_back(uvIndex[2]);
+    		normalIndices.push_back(normalIndex[0]);
+    		normalIndices.push_back(normalIndex[1]);
+    		normalIndices.push_back(normalIndex[2]);
+            }
+
+            else if(flag1 == 1 && flag2 == 1)
+            {
+              fscanf(file, "%d/%d %d/%d %d/%d\n", &vertexIndex[0], &uvIndex[0], &vertexIndex[1], &uvIndex[1], &vertexIndex[2], &uvIndex[2]);
+    	      
+    	        vertexIndices.push_back(vertexIndex[0]);
+    	  	vertexIndices.push_back(vertexIndex[1]);
+    		vertexIndices.push_back(vertexIndex[2]);
+                uvIndices.push_back(uvIndex[0]);
+    	  	uvIndices.push_back(uvIndex[1]);
+    		uvIndices.push_back(uvIndex[2]);
+            }
+
+            else if(flag1 == 1)
+            {
+              fscanf(file, "%d %d %d\n", &vertexIndex[0], &vertexIndex[1], &vertexIndex[2]);
+    	      
+    	        vertexIndices.push_back(vertexIndex[0]);
+    	  	vertexIndices.push_back(vertexIndex[1]);
+    		vertexIndices.push_back(vertexIndex[2]);
+                uvIndices.push_back(uvIndex[0]);
+    	  	uvIndices.push_back(uvIndex[1]);
+    		uvIndices.push_back(uvIndex[2]);
+            }
 	}
     }
 
-    return vertexIndices.size();
+    vertexSize = vertexIndices.size();
+    return vertexSize;
 }
 
 void cleanUp()
