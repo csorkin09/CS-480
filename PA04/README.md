@@ -17,8 +17,6 @@ Added command line arguments(only takes the executable and file name)
 
 Added all .obj conditions/cases
 
-**DID NOT DO QUADS 
- 
 
 Problems
 --------
@@ -32,7 +30,7 @@ Had problems getting the size of the different cases
 
 Had problems writing the other cases
 
-**WILL NOT LOAD DRAGON
+**CANNOT HANDLE QUADS 
 
 
 Building This Example

@@ -329,15 +329,14 @@ bool initialize()
     //you can also do this with a draw elements and indices, try to get that working
     char *fileName = file;
     int size = getFileSize(fileName);
-
-    Vertex geometry[size]; 
+    Vertex* geometry;
+    geometry = new Vertex [size];
 
     if(loadObj(fileName, geometry) == false)
     {
 	std::cout<<"Cannot load OBJ!"<<std::endl;
 	return false;
     }
-
 
     // Create a Vertex Buffer object to store this vertex info on the GPU
     glGenBuffers(1, &vbo_geometry);
@@ -587,30 +586,15 @@ bool loadObj(char *fileName, Vertex geometry[])
 	}
     }
     
-    Vertex tempGeo[vertexIndices.size()];
-
-    for(unsigned int i=0; i<vertexIndices.size(); i++)
-    {
-	temp_vertices.begin();
-	tempVec3 = temp_vertices.front();
-	
-        tempGeo[i].position[0] = tempVec3.x;
-        tempGeo[i].position[1] = tempVec3.y;
-        tempGeo[i].position[2] = tempVec3.z;
-
-	temp_vertices.erase(temp_vertices.begin());	
-    }
-
     int flag = 0;
     int index;
 
     for(unsigned int i=0; i<vertexIndices.size(); i++)
     {
 	index = vertexIndices[i];
-
-        geometry[i].position[0] = tempGeo[index-1].position[0];
-        geometry[i].position[1] = tempGeo[index-1].position[1];
-        geometry[i].position[2] = tempGeo[index-1].position[2];
+        geometry[i].position[0] = temp_vertices[index-1].x;
+        geometry[i].position[1] = temp_vertices[index-1].y;
+        geometry[i].position[2] = temp_vertices[index-1].z;
 
         if(flag == 0)
         {
