@@ -1,0 +1,5 @@
+varying vec2 color;
+uniform sampler2D gSampler;
+void main(void){
+   gl_FragColor = texture2D(gSampler, vec2(color[0],color[1]));
+}
