@@ -1,0 +1,98 @@
+#include "bullet.h"
+#include <iostream>
+using namespace std;
+
+
+
+CObject::CObject(){
+	x=0;
+	y=0;
+	z=0;
+	vx=0;
+	vy=0;
+	vz=0;
+}
+
+
+CBullet::CBullet(){
+	// Build the broadphase
+	broadphase = new btDbvtBroadphase();
+	
+	// Set up the collision configuration and dispatcher
+	collisionConfiguration = new btDefaultCollisionConfiguration();
+	dispatcher = new btCollisionDispatcher(collisionConfiguration);
+	
+	// The actual physics solver
+	solver = new btSequentialImpulseConstraintSolver;
+	
+	// The world.
+	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
+	dynamicsWorld->setGravity(btVector3(0,-10,0));
+	
+	boxCollisionShape = new btBoxShape(btVector3(0.0f, 0.0f, 0.0f));
+	boardShape = new btStaticPlaneShape(btVector3(0,00,0),1);
+	fallShape = new btSphereShape(1);
+	
+	boardMotionState =
+	new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,-1,0)));
+
+	 btRigidBody::btRigidBodyConstructionInfo
+		boardRigidBodyCI(0,boardMotionState,boardShape,btVector3(0,0,0));
+	boardRigidBody = new btRigidBody(boardRigidBodyCI);
+	dynamicsWorld->addRigidBody(boardRigidBody);
+	
+	
+	fallMotionState =
+		new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,50,0)));
+	btScalar mass = 1;
+	btVector3 fallInertia(0,0,0);
+	
+	// Set sphere
+	fallShape->calculateLocalInertia(mass,fallInertia);
+	btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass,fallMotionState,fallShape,fallInertia);
+	fallRigidBody = new btRigidBody(fallRigidBodyCI);
+	dynamicsWorld->addRigidBody(fallRigidBody);
+	
+	//Set Cylinder	
+	btVector3 cylinderInertia(0,0,0);
+	cylinderCollisionShape = new btBoxShape(btVector3(0.0f, 20.0f, 0.0f));
+	cylinderMotionState =
+		new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,0,0)));
+	cylinderCollisionShape->calculateLocalInertia(mass,cylinderInertia);
+	btRigidBody::btRigidBodyConstructionInfo cylinderRigidBodyCI(mass,cylinderMotionState,cylinderCollisionShape,cylinderInertia);
+	cylinderRigidBody = new btRigidBody(cylinderRigidBodyCI);
+	dynamicsWorld->addRigidBody(cylinderRigidBody);
+}
+
+CBullet::~CBullet(){
+	delete dynamicsWorld;
+	delete solver;
+	delete dispatcher;
+	delete collisionConfiguration;
+	delete broadphase;
+	
+	
+	dynamicsWorld->removeRigidBody(fallRigidBody);
+	delete fallRigidBody->getMotionState();
+	delete fallRigidBody;
+	
+	dynamicsWorld->removeRigidBody(boardRigidBody);
+}
+
+void CBullet::update(float dt){
+	
+	dynamicsWorld->stepSimulation(dt,10);
+	int numManifolds = dynamicsWorld->getDispatcher()->getNumManifolds();
+	cout << numManifolds << endl;
+
+	btTransform s;
+	btTransform c;
+	fallRigidBody->getMotionState()->getWorldTransform(s);
+	sphere.y = s.getOrigin().getY();
+	
+	cylinderRigidBody->getMotionState()->getWorldTransform(c);
+	cylinder.x = c.getOrigin().getX();
+	cylinder.y = c.getOrigin().getY();
+	cylinder.z = c.getOrigin().getZ();
+	
+}
